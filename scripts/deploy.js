@@ -7,22 +7,32 @@
 const hre = require("hardhat");
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+  const name = "Dapp University";
+  const symbol = "DAPP";
+  const supply = "1000000";
+  const price = hre.ethers.utils.parseUnits("0.025", "ether");
 
-  const lockedAmount = hre.ethers.parseEther("0.001");
+  const Token = await hre.ethers.getContractFactory("Token");
+  let token = await Token.deploy(name, symbol, supply);
 
-  const lock = await hre.ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
+  await token.deployed();
+  console.log(`Token deployed to: ${token.address}`);
 
-  await lock.waitForDeployment();
-
-  console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
+  const Crowdsale = await hre.ethers.getContractFactory("Crowdsale");
+  const crowdsale = await Crowdsale.deploy(
+    token.address,
+    price,
+    hre.ethers.utils.parseUnits(supply, "ether")
   );
+  await crowdsale.deployed();
+  console.log(`Crowdsale deployed to: ${crowdsale.address}\n`);
+  const transaction = await token.transfer(
+    crowdsale.address,
+    hre.ethers.utils.parseUnits(supply, "ether")
+  );
+  await transaction.wait();
+
+  console.log(`Tokens transferred to Crowdsale\n`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
