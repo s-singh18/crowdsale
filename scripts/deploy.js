@@ -13,14 +13,17 @@ async function main() {
   const price = hre.ethers.utils.parseUnits("0.025", "ether");
 
   const Token = await hre.ethers.getContractFactory("Token");
+  const Whitelist = await hre.ethers.getContractFactory("Whitelist");
   let token = await Token.deploy(name, symbol, supply);
-
   await token.deployed();
   console.log(`Token deployed to: ${token.address}`);
-
+  let whitelist = await Whitelist.deploy();
+  await whitelist.deployed();
+  console.log(`Whitelist deployed to: ${whitelist.address}`);
   const Crowdsale = await hre.ethers.getContractFactory("Crowdsale");
   const crowdsale = await Crowdsale.deploy(
     token.address,
+    whitelist.address,
     price,
     hre.ethers.utils.parseUnits(supply, "ether")
   );

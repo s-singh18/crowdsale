@@ -8,18 +8,28 @@ const tokens = (n) => {
 const ether = tokens;
 
 describe("Crowdsale", () => {
-  let crowdsale, token;
+  let crowdsale, token, whitelist;
   let deployer, user1;
 
   beforeEach(async () => {
     let Crowdsale = await ethers.getContractFactory("Crowdsale");
     let Token = await ethers.getContractFactory("Token");
+    let Whitelist = await ethers.getContractFactory("Whitelist");
+    whitelist = await Whitelist.deploy();
     token = await Token.deploy("Dapp University", "DAPP", "1000000");
     [deployer, user1] = await ethers.getSigners();
-    crowdsale = await Crowdsale.deploy(token.address, ether(1), "1000000");
+    crowdsale = await Crowdsale.deploy(
+      token.address,
+      whitelist.address,
+      ether(1),
+      "1000000"
+    );
+
     let transaction = await token
       .connect(deployer)
       .transfer(crowdsale.address, tokens(1000000));
+    await transaction.wait();
+    transaction = await whitelist.connect(deployer).addUser(user1.address);
     await transaction.wait();
   });
 

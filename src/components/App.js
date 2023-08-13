@@ -9,6 +9,7 @@ import Loading from "./Loading";
 import Buy from "./Buy";
 
 import TOKEN_ABI from "../abis/Token.json";
+import WHITELIST_ABI from "../abis/Whitelist.json";
 import CROWDSALE_ABI from "../abis/Crowdsale.json";
 
 import config from "../config.json";
@@ -29,6 +30,9 @@ function App() {
   const loadBlockchainData = async () => {
     // Initiate provider
     const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = await provider.getSigner();
+    console.log(signer);
+    // console.log(await provider.getCode());
     setProvider(provider);
 
     // Initiate contracts
@@ -37,18 +41,23 @@ function App() {
       TOKEN_ABI,
       provider
     );
+    const whitelist = new ethers.Contract(
+      config[31337].whitelist.address,
+      WHITELIST_ABI,
+      provider
+    );
     const crowdsale = new ethers.Contract(
       config[31337].crowdsale.address,
       CROWDSALE_ABI,
       provider
     );
-    setCrowdsale(crowdsale);
-    console.log(token.address);
 
-    // let accounts = await window.ethereum.request({
-    //   method: "eth_requestAccounts",
-    // });
-    const accounts = await provider.listAccounts();
+    setCrowdsale(crowdsale);
+    // console.log(token);
+    let accounts = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+    // const accounts = await provider.listAccounts();
     console.log(accounts);
     const account = ethers.utils.getAddress(accounts[0]);
     setAccount(account);
@@ -58,7 +67,7 @@ function App() {
       18
     );
     setAccountBalance(accountBalance);
-    console.log(accountBalance);
+    // console.log(accountBalance);
 
     const price = ethers.utils.formatUnits(await crowdsale.price(), 18);
     setPrice(price);
