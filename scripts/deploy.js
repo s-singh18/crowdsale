@@ -10,6 +10,9 @@ async function main() {
   const name = "Dapp University";
   const symbol = "DAPP";
   const supply = "1000000";
+  const minAmount = "10";
+  const maxAmount = "100";
+  const duration = 600;
   const price = hre.ethers.utils.parseUnits("0.025", "ether");
 
   const Token = await hre.ethers.getContractFactory("Token");
@@ -25,7 +28,10 @@ async function main() {
     token.address,
     whitelist.address,
     price,
-    hre.ethers.utils.parseUnits(supply, "ether")
+    hre.ethers.utils.parseUnits(supply, "ether"),
+    hre.ethers.utils.parseUnits(minAmount, "ether"),
+    hre.ethers.utils.parseUnits(maxAmount, "ether"),
+    duration
   );
   await crowdsale.deployed();
   console.log(`Crowdsale deployed to: ${crowdsale.address}\n`);

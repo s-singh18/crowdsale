@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { ethers } from "ethers";
+import { format } from "date-fns";
 
 import Navigation from "./Navigation";
 import Info from "./Info";
 import Progress from "./Progress";
 import Loading from "./Loading";
 import Buy from "./Buy";
+import Whitelist from "./Whitelist";
 
 import TOKEN_ABI from "../abis/Token.json";
 import WHITELIST_ABI from "../abis/Whitelist.json";
@@ -27,12 +29,32 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(true);
 
+  const [whitelist, setWhitelist] = useState(null);
+  const [currentTimestamp, setCurrentTimestamp] = useState(null);
+  const [closingTimestamp, setClosingTimestamp] = useState(null);
+
+  const timestampToDateTime = (blockTimestamp) => {
+    return new Date(blockTimestamp * 1000).toLocaleString();
+  };
+
+  const ICOStatus = ({ endTime }) => {
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (currentTime > closingTimestamp) {
+      return <p className="text-center">Sale closed</p>;
+    } else {
+      return (
+        <p className="text-center">
+          <strong>Closing time: </strong>
+          {timestampToDateTime(closingTimestamp)}
+        </p>
+      );
+    }
+  };
+
   const loadBlockchainData = async () => {
     // Initiate provider
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = await provider.getSigner();
-    console.log(signer);
-    // console.log(await provider.getCode());
+    const signer = provider.getSigner();
     setProvider(provider);
 
     // Initiate contracts
@@ -41,10 +63,12 @@ function App() {
       TOKEN_ABI,
       provider
     );
-    const whitelist = new ethers.Contract(
-      config[31337].whitelist.address,
-      WHITELIST_ABI,
-      provider
+    setWhitelist(
+      new ethers.Contract(
+        config[31337].whitelist.address,
+        WHITELIST_ABI,
+        signer
+      )
     );
     const crowdsale = new ethers.Contract(
       config[31337].crowdsale.address,
@@ -53,13 +77,12 @@ function App() {
     );
 
     setCrowdsale(crowdsale);
-    // console.log(token);
     let accounts = await window.ethereum.request({
       method: "eth_requestAccounts",
+      params: [],
     });
-    // const accounts = await provider.listAccounts();
-    console.log(accounts);
-    const account = ethers.utils.getAddress(accounts[0]);
+
+    const account = ethers.utils.getAddress(accounts[0]).toLowerCase();
     setAccount(account);
 
     const accountBalance = ethers.utils.formatUnits(
@@ -67,7 +90,6 @@ function App() {
       18
     );
     setAccountBalance(accountBalance);
-    // console.log(accountBalance);
 
     const price = ethers.utils.formatUnits(await crowdsale.price(), 18);
     setPrice(price);
@@ -78,6 +100,9 @@ function App() {
       18
     );
     setTokensSold(tokensSold);
+    const blockNumber = await provider.getBlockNumber();
+    setCurrentTimestamp(Math.floor(Date.now() / 1000));
+    setClosingTimestamp(await crowdsale.closingTime());
 
     setIsLoading(false);
   };
@@ -87,6 +112,16 @@ function App() {
       loadBlockchainData();
     }
   }, [isLoading]);
+
+  window.ethereum.on(
+    "accountsChanged",
+    () => {
+      if (isLoading) {
+        loadBlockchainData();
+      }
+    },
+    [isLoading]
+  );
 
   return (
     <Container>
@@ -109,8 +144,16 @@ function App() {
           <Progress maxTokens={maxTokens} tokensSold={tokensSold} />
         </>
       )}
-
+      <Row>
+        <ICOStatus endTime={closingTimestamp} />
+      </Row>
       {account && <Info account={account} accountBalance={accountBalance} />}
+
+      {account === config[31337].owner.address ? (
+        <Whitelist provider={provider} whitelist={whitelist} />
+      ) : (
+        <p />
+      )}
     </Container>
   );
 }

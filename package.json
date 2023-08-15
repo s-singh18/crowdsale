@@ -9,6 +9,7 @@
     "@thirdweb-dev/react": "^3.14.30",
     "@thirdweb-dev/sdk": "^3.10.49",
     "bootstrap": "^5.3.1",
+    "date-fns": "^2.30.0",
     "ethers": "^5.7.2",
     "react": "^18.2.0",
     "react-bootstrap": "^2.8.0",

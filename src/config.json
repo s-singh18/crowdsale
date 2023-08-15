@@ -8,6 +8,9 @@
     },
     "crowdsale": {
       "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+    },
+    "owner": {
+      "address": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     }
   }
 }

@@ -22,7 +22,10 @@ describe("Crowdsale", () => {
       token.address,
       whitelist.address,
       ether(1),
-      "1000000"
+      "1000000",
+      10,
+      100,
+      10
     );
 
     let transaction = await token
@@ -81,6 +84,18 @@ describe("Crowdsale", () => {
       it("Should reject insufficient ETH", async () => {
         await expect(
           crowdsale.connect(user1).buyTokens(tokens(10), { value: 0 })
+        ).to.be.reverted;
+      });
+
+      it("Should reject purchase less than 10 ETH", async () => {
+        await expect(
+          crowdsale.connect(user1).buyTokens(tokens(9), { value: 0 })
+        ).to.be.reverted;
+      });
+
+      it("Should reject purchase more than 100 ETH", async () => {
+        await expect(
+          crowdsale.connect(user1).buyTokens(tokens(101), { value: 0 })
         ).to.be.reverted;
       });
     });
@@ -170,6 +185,27 @@ describe("Crowdsale", () => {
     describe("Failure", () => {
       it("prevents non-owner from finalizing", async () => {
         await expect(crowdsale.connect(user1).finalize()).to.be.reverted;
+      });
+    });
+  });
+
+  describe("Testing Timestamp", () => {
+    let transaction, result;
+    let amount = tokens(10);
+
+    describe("Failure", () => {
+      beforeEach(async () => {
+        transaction = await crowdsale
+          .connect(user1)
+          .buyTokens(amount, { value: ether(10) });
+        result = await transaction.wait();
+      });
+
+      it("Should fail after 10 seconds", async () => {
+        await new Promise((r) => setTimeout(r, 10000));
+        await expect(
+          crowdsale.connect(user1).buyTokens(tokens(101), { value: 0 })
+        ).to.be.reverted;
       });
     });
   });

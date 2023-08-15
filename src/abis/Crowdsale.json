@@ -20,6 +20,21 @@
         "internalType": "uint256",
         "name": "_maxTokens",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_minAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_duration",
+        "type": "uint256"
       }
     ],
     "stateMutability": "nonpayable",
@@ -78,6 +93,19 @@
   },
   {
     "inputs": [],
+    "name": "closingTime",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "finalize",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -85,7 +113,33 @@
   },
   {
     "inputs": [],
+    "name": "maxAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "maxTokens",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "minAmount",
     "outputs": [
       {
         "internalType": "uint256",
